@@ -1,0 +1,3 @@
+pytubefix
+youtube_search
+spotipy
