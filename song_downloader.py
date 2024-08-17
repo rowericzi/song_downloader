@@ -1,8 +1,10 @@
 import sys
 import warnings
 import re
+from pathlib import Path
 
 import spotipy
+import ffmpeg
 from pytubefix import YouTube
 from youtube_search import YoutubeSearch
 from spotipy import SpotifyPKCE
@@ -11,11 +13,18 @@ CLIENT_ID = "dbabf45ecf1c4645853f4baafc3096b4"
 REDIRECT_URL = "http://localhost:8080"
 
 
+def convert_mp4_audio_to_m4a(filename: Path):
+    new_name = filename.with_suffix(".m4a")
+    ffmpeg.input(str(filename)).audio.output(filename=new_name, acodec="copy").run(overwrite_output=True)
+    Path.unlink(filename)
+
+
 def download_from_yt_url(url: str):
     print(f"Downloading audio from {url}")
     yt = YouTube(url)
-    yt.streams.get_audio_only().download()
+    filepath = yt.streams.get_audio_only().download()
     print("Downloading finished")
+    return filepath
 
 
 def download_from_yt_by_name(search_term: str):
@@ -23,7 +32,8 @@ def download_from_yt_by_name(search_term: str):
     search_result = YoutubeSearch(search_term, max_results=1).to_dict()[0]
     video_url = f"https://www.youtube.com/watch?v={search_result['id']}"
     print(f"Found: {search_result['title']}, url: {video_url}")
-    download_from_yt_url(video_url)
+    filepath = download_from_yt_url(video_url)
+    convert_mp4_audio_to_m4a(Path(filepath))
 
 
 def extract_playlist_id_from_url(playlist_url: str):

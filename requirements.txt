@@ -1,3 +1,4 @@
 pytubefix
 youtube_search
 spotipy
+ffmpeg-python
