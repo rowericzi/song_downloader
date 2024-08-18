@@ -21,12 +21,12 @@ def convert_mp4_audio_to_m4a(filename: Path):
 
 
 def download_from_yt_url(url: str):
-    yt = YouTube(url)
-    if (path_as_m4a := Path(yt.title).with_suffix(".m4a")).exists():
+    audio_stream = YouTube(url).streams.get_audio_only()
+    if (path_as_m4a := Path(audio_stream.default_filename).with_suffix(".m4a")).exists():
         print(f"File {path_as_m4a} already exists, skipping...")
         return None
     print(f"Downloading audio from {url}")
-    filepath = yt.streams.get_audio_only().download()
+    filepath = audio_stream.download()
     print("Downloading finished")
     return filepath
 
