@@ -5,6 +5,7 @@ a tool for downloading songs from youtube
 
 ```commandline
 git clone https://github.com/rowericzi/song_downloader
+cd song_downloader
 pip install .
 ```
 
