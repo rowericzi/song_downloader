@@ -1,7 +1,6 @@
 import re
 import sys
 from pathlib import Path
-from typing import List
 
 import ffmpeg
 from pytubefix import Playlist, YouTube
@@ -40,7 +39,7 @@ def get_youtube_url_from_name(search_term: str) -> str:
     return video_url
 
 
-def get_urls_from_youtube_playlist(playlist_url: str) -> List[str]:
+def get_urls_from_youtube_playlist(playlist_url: str) -> list[str]:
     playlist = Playlist(playlist_url)
     return [url for url in playlist.video_urls]
 
@@ -54,7 +53,7 @@ def get_spotify_playlist_id_from_url(playlist_url: str) -> str:
         )
 
 
-def get_song_titles_from_spotify_playlist(playlist_url: str) -> List[str]:
+def get_song_titles_from_spotify_playlist(playlist_url: str) -> list[str]:
     playlist_id = get_spotify_playlist_id_from_url(playlist_url)
     cache_path = Path.home() / ".cache" / "song_downloader"
     cache_path.mkdir(parents=True, exist_ok=True)
