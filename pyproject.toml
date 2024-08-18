@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "song_downloader"
+version = "0.0.1"
+authors = [
+  { name="Ryszard Jezierski", email="jezierski.ryszard@gmail.com" },
+]
+description = "a tool for downloading songs from youtube"
+readme = "README.md"
+requires-python = ">=3.8"
+dependencies = ["pytubefix", "youtube_search", "spotipy", "ffmpeg-python"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.scripts]
+song_downloader = "song_downloader.song_downloader:main"
+
+[project.urls]
+Homepage = "https://github.com/rowericzi/song_downloader"
+Issues = "https://github.com/rowericzi/song_downloader/issues"

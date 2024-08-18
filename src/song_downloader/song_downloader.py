@@ -59,6 +59,9 @@ def download_from_spotify(playlist_url: str):
 
 
 def main():
+    if len(sys.argv) is not 2:
+        print("[error] required 1 positional argument: search term, youtube video link or spotify playlist link")
+        exit(1)
     user_input = sys.argv[1]
     if "youtube.com" in user_input:
         # assume it's a link - let's worry about validation later
