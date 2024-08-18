@@ -8,6 +8,8 @@ git clone https://github.com/rowericzi/song_downloader
 cd song_downloader
 pip install .
 ```
+this tool uses [ffmpeg-python](https://github.com/kkroening/ffmpeg-python),
+which requires [ffmpeg](https://www.ffmpeg.org/) to be installed on your operating system
 
 
 ### usage
@@ -22,6 +24,8 @@ song_downloader "never gonna give you up"
 ```
  will search youtube for "never gonna give you up" and dowload the first
 audio from the first result as .m4a
+
+you can also pass a semicolon-separated list of search terms here
 
 ```commandline
 song_downloader <link_to_spotify_playlist>
