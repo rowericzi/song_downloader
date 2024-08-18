@@ -8,6 +8,7 @@ import ffmpeg
 from pytubefix import YouTube
 from youtube_search import YoutubeSearch
 from spotipy import SpotifyPKCE
+from spotipy.cache_handler import CacheFileHandler
 
 CLIENT_ID = "dbabf45ecf1c4645853f4baafc3096b4"
 REDIRECT_URL = "http://localhost:8080"
@@ -45,8 +46,11 @@ def extract_playlist_id_from_url(playlist_url: str):
 
 def download_from_spotify(playlist_url: str):
     playlist_id = extract_playlist_id_from_url(playlist_url)
+    cache_path = Path.home() / ".cache" / "song_downloader"
+    cache_path.mkdir(parents=True, exist_ok=True)
+    cache_handler = CacheFileHandler(cache_path / "spotify_token.cache")
     spotipy_pkce = SpotifyPKCE(client_id=CLIENT_ID, redirect_uri=REDIRECT_URL, scope="playlist-read-private,"
-                                                                                     "playlist-read-collaborative")
+                                                                                     "playlist-read-collaborative", cache_handler=cache_handler)
     access_token = spotipy_pkce.get_access_token()
     sp = spotipy.Spotify(auth=access_token)
     playlist = sp.playlist(playlist_id)
