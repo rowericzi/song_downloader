@@ -16,9 +16,10 @@ REDIRECT_URL = "http://localhost:8080"
 
 def convert_mp4_audio_to_m4a(filename: Path):
     new_name = filename.with_suffix(".m4a")
-    ffmpeg.input(str(filename)).audio.output(filename=new_name, acodec="copy").run(
-        overwrite_output=True
-    )
+    # TODO: remove loglevel="quiet" when debugging
+    ffmpeg.input(str(filename)).audio.output(
+        filename=new_name, acodec="copy", loglevel="quiet"
+    ).run(overwrite_output=True)
     Path.unlink(filename)
 
 
