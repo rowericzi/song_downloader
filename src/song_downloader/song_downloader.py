@@ -4,8 +4,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import ffmpeg
-from mutagen.easymp4 import EasyMP4
+import requests
+from mutagen.mp4 import MP4, MP4Cover
 from pytubefix import Playlist, YouTube
+from requests.exceptions import HTTPError
 from spotipy import Spotify, SpotifyPKCE
 from spotipy.cache_handler import CacheFileHandler
 from youtube_search import YoutubeSearch
@@ -21,6 +23,7 @@ class SongDescription:
     title: str = None
     artist: str = None
     album: str = None
+    cover_art_url: str = None
     youtube_url: str = None
 
     def search(self) -> str:
@@ -28,14 +31,27 @@ class SongDescription:
 
 
 def try_add_metadata(filename: str, song: SongDescription) -> None:
-    audiofile = EasyMP4(filename)
+    audio_file = MP4(filename)
+
+    try:
+        response = requests.get(song.cover_art_url)
+        cover_data = response.content
+        audio_file.tags["covr"] = [
+            MP4Cover(cover_data, imageformat=MP4Cover.FORMAT_JPEG)
+        ]
+    except HTTPError as err:
+        print(
+            f"[warning] failed to download album cover for {song.search()}: {str(err)}"
+        )
+
     if song.title is not None:
-        audiofile["title"] = song.title
+        audio_file.tags["\xa9nam"] = song.title
     if song.artist is not None:
-        audiofile["artist"] = song.artist
+        audio_file.tags["\xa9ART"] = song.artist
     if song.album is not None:
-        audiofile["album"] = song.album
-    audiofile.save()
+        audio_file.tags["\xa9alb"] = song.album
+
+    audio_file.save()
 
 
 def convert_mp4_audio_to_m4a(filename: Path) -> Path:
@@ -100,10 +116,12 @@ def get_songs_from_spotify_playlist(playlist_url: str) -> list[SongDescription]:
         track_name = track["track"]["name"]
         main_track_artist = track["track"]["artists"][0]["name"]
         album_name = track["track"]["album"]["name"]
+        cover_art_url = track["track"]["album"]["images"][0]["url"]
         track_list_entry: SongDescription = SongDescription(
             title=track_name,
             artist=main_track_artist,
             album=album_name,
+            cover_art_url=cover_art_url,
         )
         track_list.append(track_list_entry)
     return track_list

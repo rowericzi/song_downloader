@@ -11,7 +11,7 @@ authors = [
 description = "a tool for downloading songs from youtube"
 readme = "README.md"
 requires-python = ">=3.9"
-dependencies = ["pytubefix", "youtube_search", "spotipy", "ffmpeg-python", "mutagen"]
+dependencies = ["pytubefix", "youtube_search", "spotipy", "ffmpeg-python", "mutagen", "requests"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
