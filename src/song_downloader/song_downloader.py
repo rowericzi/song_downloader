@@ -169,7 +169,7 @@ def main():
         ]
 
     if len(songs_with_yt_urls) == 0:
-        print("[error] something went wrong, list of urls to download is empty")
+        print("[error] something went wrong, list of urls to download is empty. maybe the playlist is private?")
         exit(1)
 
     for song in songs_with_yt_urls:
