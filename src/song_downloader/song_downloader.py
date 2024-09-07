@@ -2,6 +2,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse, parse_qs
 
 import ffmpeg
 import requests
@@ -32,6 +33,12 @@ class SongDescription:
 
 def try_add_metadata(filename: str, song: SongDescription) -> None:
     audio_file = MP4(filename)
+
+    if song.cover_art_url is None:
+        url_data = urlparse(song.youtube_url)
+        query = parse_qs(url_data.query)
+        video_id = query["v"][0]
+        song.cover_art_url = f"https://img.youtube.com/vi/{video_id}/0.jpg"
 
     try:
         response = requests.get(song.cover_art_url)
@@ -69,6 +76,7 @@ def download_from_yt_url(song: SongDescription) -> None:
     path_as_m4a = Path(audio_stream.default_filename).with_suffix(".m4a")
     if path_as_m4a.exists():
         print(f'[info] file "{path_as_m4a}" already exists, skipping download...')
+        try_add_metadata(str(path_as_m4a), song)
         return
     print(f'[info] downloading "{path_as_m4a}" from {song.youtube_url}')
     filepath = audio_stream.download()
