@@ -118,9 +118,13 @@ def get_songs_from_spotify_playlist(playlist_url: str) -> list[SongDescription]:
     )
     access_token = spotipy_pkce.get_access_token()
     sp = Spotify(auth=access_token)
-    playlist = sp.playlist(playlist_id)
-    track_list = []
-    for track in playlist["tracks"]["items"]:
+    playlist = sp.playlist(playlist_id)["tracks"]
+    track_list_internal = []
+    playlist_items = playlist["items"]
+    while playlist["next"]:
+        playlist = sp.next(playlist)
+        playlist_items.extend(playlist["items"])
+    for track in playlist_items:
         track_name = track["track"]["name"]
         main_track_artist = track["track"]["artists"][0]["name"]
         album_name = track["track"]["album"]["name"]
@@ -131,8 +135,8 @@ def get_songs_from_spotify_playlist(playlist_url: str) -> list[SongDescription]:
             album=album_name,
             cover_art_url=cover_art_url,
         )
-        track_list.append(track_list_entry)
-    return track_list
+        track_list_internal.append(track_list_entry)
+    return track_list_internal
 
 
 def main():
