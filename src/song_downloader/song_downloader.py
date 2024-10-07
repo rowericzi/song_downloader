@@ -1,13 +1,15 @@
 import re
 import sys
+import time
 from dataclasses import dataclass
 from pathlib import Path
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 import ffmpeg
 import requests
 from mutagen.mp4 import MP4, MP4Cover
-from pytubefix import Playlist, YouTube
+from pytubefix import Playlist, Stream, YouTube
+from pytubefix.exceptions import VideoUnavailable
 from requests.exceptions import HTTPError
 from spotipy import Spotify, SpotifyPKCE
 from spotipy.cache_handler import CacheFileHandler
@@ -71,8 +73,28 @@ def convert_mp4_audio_to_m4a(filename: Path) -> Path:
     return new_name
 
 
+def get_audio_stream(
+    song: SongDescription, max_retries: int = 5, retry_timeout: int = 5
+) -> Stream:
+    num_attempts = 0
+    while True:
+        try:
+            audio_stream = YouTube(
+                song.youtube_url, client="ANDROID_MUSIC"
+            ).streams.get_audio_only()
+            return audio_stream
+        except VideoUnavailable:
+            num_attempts += 1
+            if num_attempts >= max_retries:
+                raise
+            print(
+                f"[warning] an issue with downloading {song.artist} - {song.title}, retrying in {retry_timeout} seconds..."
+            )
+            time.sleep(retry_timeout)
+
+
 def download_from_yt_url(song: SongDescription) -> None:
-    audio_stream = YouTube(song.youtube_url).streams.get_audio_only()
+    audio_stream = get_audio_stream(song)
     path_as_m4a = Path(audio_stream.default_filename).with_suffix(".m4a")
     if path_as_m4a.exists():
         print(f'[info] file "{path_as_m4a}" already exists, skipping download...')
@@ -173,11 +195,16 @@ def main():
         ]
 
     if len(songs_with_yt_urls) == 0:
-        print("[error] something went wrong, list of urls to download is empty. maybe the playlist is private?")
+        print(
+            "[error] something went wrong, list of urls to download is empty. maybe the playlist is private?"
+        )
         exit(1)
 
     for song in songs_with_yt_urls:
-        download_from_yt_url(song)
+        try:
+            download_from_yt_url(song)
+        except VideoUnavailable:
+            print(f"[error] couldn't download due to youtube error, skipping...")
 
 
 if __name__ == "__main__":
